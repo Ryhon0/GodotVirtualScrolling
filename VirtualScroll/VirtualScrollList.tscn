@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcf1vu31tluwa"]
+
+[ext_resource type="Script" path="res://VirtualScroll/VirtualScrollList.cs" id="1_0ji74"]
+
+[node name="VirtualScrollList" type="VBoxContainer" node_paths=PackedStringArray("LayoutBox")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_0ji74")
+LayoutBox = NodePath("SubViewport/LayoutBox")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+own_world_3d = true
+handle_input_locally = false
+gui_disable_input = true
+gui_embed_subwindows = true
+render_target_update_mode = 0
+
+[node name="LayoutBox" type="VBoxContainer" parent="SubViewport"]
+offset_right = 40.0
+offset_bottom = 40.0

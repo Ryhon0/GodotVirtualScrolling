@@ -1,0 +1,64 @@
+[gd_scene load_steps=4 format=3 uid="uid://faldp31vpik7"]
+
+[ext_resource type="Script" path="res://Main.cs" id="1_2kpg4"]
+[ext_resource type="PackedScene" uid="uid://bcf1vu31tluwa" path="res://VirtualScroll/VirtualScrollList.tscn" id="2_t3abi"]
+[ext_resource type="Texture2D" uid="uid://b7bv7k2c3vbrp" path="res://icon.svg" id="3_mwujt"]
+
+[node name="Main" type="Control" node_paths=PackedStringArray("ScrollList")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2kpg4")
+ScrollList = NodePath("HBoxContainer/ColorRect/VirtualScrollList")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+color = Color(0.192157, 0.192157, 0.192157, 1)
+
+[node name="VirtualScrollList" parent="HBoxContainer/ColorRect" instance=ExtResource("2_t3abi")]
+layout_mode = 1
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/ColorRect/VirtualScrollList"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+color = Color(0, 0, 1, 0)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect/VirtualScrollList/ColorRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/ColorRect/VirtualScrollList/ColorRect/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("3_mwujt")
+expand_mode = 1
+
+[node name="-Name" type="Label" parent="HBoxContainer/ColorRect/VirtualScrollList/ColorRect/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "{0}"
+
+[node name="-Price" type="Label" parent="HBoxContainer/ColorRect/VirtualScrollList/ColorRect/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "{0:C2}"
+
+[node name="Control" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
