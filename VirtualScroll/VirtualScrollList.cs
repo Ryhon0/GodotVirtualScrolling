@@ -14,7 +14,7 @@ public partial class VirtualScrollList : Control
 
 	public IList<object> Items;
 
-	static bool DebugDraw = false;
+	static bool DebugDraw = true;
 
 	[Export]
 	public float Scroll = 0;
@@ -25,7 +25,12 @@ public partial class VirtualScrollList : Control
 
 	public override void _Ready()
 	{
-		Template = GetChild<Control>(1);
+		Template = GetNode<Control>("Template");
+		if (Template == null)
+		{
+			GD.PushError("Virtual Scroll List template '" + GetPath() + "Template' not found");
+			return;
+		}
 		RemoveChild(Template);
 
 		LayoutBox.AddChild(Template);
@@ -35,6 +40,7 @@ public partial class VirtualScrollList : Control
 	{
 		LayoutBox.SetSize(GetRect().Size);
 
+		if (Template == null || Items == null) return;
 		if (Scroll < 0)
 		{
 			Scroll = (float)Mathf.Lerp(Scroll, 0, delta * 10);
@@ -66,7 +72,7 @@ public partial class VirtualScrollList : Control
 	bool pressed = false;
 	public override void _GuiInput(InputEvent @event)
 	{
-		base._GuiInput(@event);
+		if (Template == null || Items == null) return;
 
 		if (@event is InputEventMouseButton mb)
 		{
@@ -119,6 +125,8 @@ public partial class VirtualScrollList : Control
 
 	public override void _Draw()
 	{
+		if (Template == null || Items == null) return;
+
 		Rect2 TemplateBox = Template.GetRect();
 
 		int startIndex = Math.Max(0, Mathf.FloorToInt(Scroll / TemplateBox.Size.Y));
@@ -161,12 +169,16 @@ public partial class VirtualScrollList : Control
 			else
 				text = l.Text;
 
-			int fontSize = 16;
+			int fontSize = l.GetThemeFontSize("font_size");
+			if (fontSize == 0) fontSize = l.GetThemeDefaultFontSize();
+
 			DrawString(
 				l.GetThemeFont("font"),
 				ItemBox.Position + new Vector2(0, fontSize),
 				text,
-				fontSize: fontSize
+				l.HorizontalAlignment,
+				fontSize: fontSize,
+				width: ItemBox.Size.X
 				);
 		}
 		else if (template is TextureRect rect)

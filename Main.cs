@@ -47,7 +47,7 @@ public partial class Main : Control
 
 class ListItem
 {
-	static string StaticText = "Some satic value";
+	static string StaticField = "Some satic value";
 	public string Name = "abcddawdawd";
 	public float Price = 1.0f;
 }
