@@ -6,23 +6,18 @@ public partial class Main : Control
 {
 	[Export]
 	VirtualScrollList ScrollList;
+	List<object> items = new List<object>();
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		ScrollList.Items = new List<object>()
-		{
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-			CreateRandomItem(),
-		};
+		ScrollList.Items = items;
+	}
+
+	void AddItem()
+	{
+		ScrollList.Items.Add(CreateRandomItem());
+		ScrollList.QueueRedraw();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

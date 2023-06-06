@@ -12,9 +12,9 @@ public partial class VirtualScrollList : Control
 	[Signal]
 	public delegate void OnItemSelectedEventHandler(int idx);
 
-	public IList<object> Items;
+	public IList<object> Items = new List<object>();
 
-	static bool DebugDraw = true;
+	static bool DebugDraw = false;
 
 	[Export]
 	public float Scroll = 0;
@@ -34,6 +34,13 @@ public partial class VirtualScrollList : Control
 		RemoveChild(Template);
 
 		LayoutBox.AddChild(Template);
+	}
+
+	public void AddItem(Variant o)
+	{
+		Items.Add(o);
+
+		QueueRedraw();
 	}
 
 	public override void _Process(double delta)
@@ -199,6 +206,15 @@ public partial class VirtualScrollList : Control
 
 	object GetProperty(object obj, string name)
 	{
+		if (obj is Variant v)
+		{
+			if(v.VariantType == Variant.Type.Dictionary)
+				return ((Godot.Collections.Dictionary)v).GetValueOrDefault(name).Obj;
+
+			if (v.VariantType == Variant.Type.Object)
+				return ((GodotObject)(object)v).Get(name).Obj;
+		}
+
 		var prop = obj.GetType().GetProperty(name, BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 		if (prop != null)
 			return prop.GetValue(obj);
@@ -206,6 +222,8 @@ public partial class VirtualScrollList : Control
 		var field = obj.GetType().GetField(name, BindingFlags.GetField | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 		if (field != null)
 			return field.GetValue(obj);
+
+
 
 		return null;
 	}
