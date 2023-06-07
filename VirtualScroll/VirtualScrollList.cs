@@ -152,8 +152,6 @@ public partial class VirtualScrollList : Control
 		int col = Mathf.FloorToInt(pos.X/isize.X);
 		int row = Mathf.FloorToInt(pos.Y/isize.Y);
 
-		GD.Print(row + ":" + col);
-
 		return (row * cols) + col;
 	}
 
