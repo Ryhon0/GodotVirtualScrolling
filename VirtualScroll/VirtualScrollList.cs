@@ -8,6 +8,8 @@ public partial class VirtualScrollList : Control
 {
 	[Export]
 	SubViewport TemplateViewport;
+	[Export]
+	GridAlignment GridAlignment;
 	Control Template;
 
 	[Signal]
@@ -81,6 +83,10 @@ public partial class VirtualScrollList : Control
 				}
 			}
 		}
+		else
+		{
+			Template.Position += new Vector2(GetGridMargin(), 0);
+		}
 	}
 
 	bool pressed = false;
@@ -133,7 +139,7 @@ public partial class VirtualScrollList : Control
 
 	public int GetIndexAtPosition(Vector2 pos)
 	{
-		pos += new Vector2(0, Scroll);
+		pos += new Vector2(-GetGridMargin(), Scroll);
 
 		var isize = GetItemSize();
 		int cols = GetColumnCount();
@@ -159,6 +165,22 @@ public partial class VirtualScrollList : Control
 
 	public float GetEndPositon()
 		=> (Items.Count * Template.Size.Y) / GetColumnCount();
+	
+	float GetGridMargin()
+	{
+		switch(GridAlignment)
+		{
+			case GridAlignment.Left:
+			default:
+				return 0;
+
+			case GridAlignment.Right:
+				return GetRect().Size.X - (GetItemSize().X * GetColumnCount());
+			
+			case GridAlignment.Center:
+				return (GetRect().Size.X - (GetItemSize().X * GetColumnCount()))/2;
+		}
+	}
 
 	public override void _Draw()
 	{
@@ -174,6 +196,7 @@ public partial class VirtualScrollList : Control
 		if (startIndex > endIndex)
 			return;
 
+		var margin = GetGridMargin();
 		for (int i = startIndex; i < endIndex; i++)
 		{
 			int col = i % cols;
@@ -182,8 +205,8 @@ public partial class VirtualScrollList : Control
 			Rect2 ItemBBox = TemplateBox;
 			Vector2 newPos = ItemBBox.Position;
 			newPos.Y -= Scroll;
-			newPos.Y += row * TemplateBox.Size.Y;
-			newPos.X += col * TemplateBox.Size.X;
+			newPos += new Vector2(col * TemplateBox.Size.X, row * TemplateBox.Size.Y);
+			newPos.X += margin;
 			ItemBBox.Position = newPos;
 
 			if (i == -1)
@@ -262,4 +285,11 @@ public partial class VirtualScrollList : Control
 
 		return null;
 	}
+}
+
+enum GridAlignment
+{
+	Left,
+	Right,
+	Center,
 }
