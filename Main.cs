@@ -5,13 +5,13 @@ using System.Collections.Generic;
 public partial class Main : Control
 {
 	[Export]
-	VirtualScrollList ScrollList;
+	VirtualScrollList ScrollList, ScrollGrid;
 	List<object> items = new List<object>();
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		ScrollList.Items = items;
+		ScrollGrid.Items = ScrollList.Items = items;
 	}
 
 	void AddItem()

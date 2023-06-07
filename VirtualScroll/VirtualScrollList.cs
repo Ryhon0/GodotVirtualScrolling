@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
+[Tool]
 public partial class VirtualScrollList : Control
 {
 	[Export]
-	VBoxContainer LayoutBox;
+	SubViewport TemplateViewport;
 	Control Template;
 
 	[Signal]
@@ -14,26 +15,30 @@ public partial class VirtualScrollList : Control
 
 	public IList<object> Items = new List<object>();
 
-	static bool DebugDraw = false;
+	static bool DebugDraw = true;
 
-	[Export]
 	public float Scroll = 0;
 	[Export]
 	public float ScrollTickAmount = 10;
+	[Export]
+	public int RowWidth = -1;
 
 	int selectedIdx = -1;
 
 	public override void _Ready()
 	{
 		Template = GetNode<Control>("Template");
-		if (Template == null)
+		if (!Engine.IsEditorHint())
 		{
-			GD.PushError("Virtual Scroll List template '" + GetPath() + "Template' not found");
-			return;
-		}
-		RemoveChild(Template);
+			if (Template == null)
+			{
+				GD.PushError("Virtual Scroll List template '" + GetPath() + "Template' not found");
+				return;
+			}
+			RemoveChild(Template);
 
-		LayoutBox.AddChild(Template);
+			TemplateViewport.AddChild(Template);
+		}
 	}
 
 	public void AddItem(Variant o)
@@ -45,35 +50,37 @@ public partial class VirtualScrollList : Control
 
 	public override void _Process(double delta)
 	{
-		LayoutBox.SetSize(GetRect().Size);
+		Template.Position = Vector2.Zero;
+		Template.SetSize(GetItemSize());
 
-		if (Template == null || Items == null) return;
-		if (Scroll < 0)
+		if (!Engine.IsEditorHint())
 		{
-			Scroll = (float)Mathf.Lerp(Scroll, 0, delta * 10);
-			QueueRedraw();
-		}
-		else
-		{
-			if (GetEndPositon() > GetRect().Size.Y)
+			if (Template == null || Items == null) return;
+			if (Scroll < 0)
 			{
-				if (Scroll + GetRect().Size.Y > GetEndPositon())
-				{
-					Scroll = (float)Mathf.Lerp(Scroll, GetEndPositon() - GetRect().Size.Y, delta * 10);
-					QueueRedraw();
-				}
+				Scroll = (float)Mathf.Lerp(Scroll, 0, delta * 10);
+				QueueRedraw();
 			}
 			else
 			{
-				if (Scroll > 0)
+				if (GetEndPositon() > GetRect().Size.Y)
 				{
-					Scroll = (float)Mathf.Lerp(Scroll, 0, delta * 10);
-					QueueRedraw();
+					if (Scroll + GetRect().Size.Y > GetEndPositon())
+					{
+						Scroll = (float)Mathf.Lerp(Scroll, GetEndPositon() - GetRect().Size.Y, delta * 10);
+						QueueRedraw();
+					}
+				}
+				else
+				{
+					if (Scroll > 0)
+					{
+						Scroll = (float)Mathf.Lerp(Scroll, 0, delta * 10);
+						QueueRedraw();
+					}
 				}
 			}
 		}
-
-
 	}
 
 	bool pressed = false;
@@ -111,14 +118,37 @@ public partial class VirtualScrollList : Control
 		}
 	}
 
+	public Vector2 GetItemSize()
+	{
+		if (RowWidth <= 0)
+			return new Vector2(GetRect().Size.X, Template.GetRect().Size.Y);
+		else
+			return new Vector2(RowWidth, Template.GetRect().Size.Y);
+	}
+
+	public int GetColumnCount()
+	{
+		return Mathf.FloorToInt(GetRect().Size.X / GetItemSize().X);
+	}
+
 	public int GetIndexAtPosition(Vector2 pos)
 	{
 		pos += new Vector2(0, Scroll);
 
-		if (pos.Y >= GetEndPositon())
+		var isize = GetItemSize();
+		int cols = GetColumnCount();
+		float width = isize.X * cols;
+		float height = GetEndPositon();
+		
+		if(!new Rect2(Vector2.Zero, width, height).HasPoint(pos))
 			return -1;
 
-		return Mathf.FloorToInt(pos.Y / Template.GetRect().Size.Y);
+		int col = Mathf.FloorToInt(pos.X/isize.X);
+		int row = Mathf.FloorToInt(pos.Y/isize.Y);
+
+		GD.Print(row + ":" + col);
+
+		return (row * cols) + col;
 	}
 
 	public void SelctItem(int idx)
@@ -128,7 +158,7 @@ public partial class VirtualScrollList : Control
 	}
 
 	public float GetEndPositon()
-		=> Items.Count * Template.Size.Y;
+		=> (Items.Count * Template.Size.Y) / GetColumnCount();
 
 	public override void _Draw()
 	{
@@ -136,8 +166,9 @@ public partial class VirtualScrollList : Control
 
 		Rect2 TemplateBox = Template.GetRect();
 
-		int startIndex = Math.Max(0, Mathf.FloorToInt(Scroll / TemplateBox.Size.Y));
-		int endIndex = Math.Min(Items.Count, startIndex + Mathf.CeilToInt(GetRect().Size.Y / TemplateBox.Size.Y) + 1);
+		var cols = GetColumnCount();
+		int startIndex = Math.Max(0, Mathf.FloorToInt(Scroll / TemplateBox.Size.Y) * cols);
+		int endIndex = Math.Min(Items.Count, startIndex + ((Mathf.CeilToInt(GetRect().Size.Y / TemplateBox.Size.Y) * cols)));
 
 		// Nothing to draw
 		if (startIndex > endIndex)
@@ -145,10 +176,14 @@ public partial class VirtualScrollList : Control
 
 		for (int i = startIndex; i < endIndex; i++)
 		{
+			int col = i % cols;
+			int row = i / cols;
+
 			Rect2 ItemBBox = TemplateBox;
 			Vector2 newPos = ItemBBox.Position;
 			newPos.Y -= Scroll;
-			newPos.Y += i * TemplateBox.Size.Y;
+			newPos.Y += row * TemplateBox.Size.Y;
+			newPos.X += col * TemplateBox.Size.X;
 			ItemBBox.Position = newPos;
 
 			if (i == -1)
@@ -208,7 +243,7 @@ public partial class VirtualScrollList : Control
 	{
 		if (obj is Variant v)
 		{
-			if(v.VariantType == Variant.Type.Dictionary)
+			if (v.VariantType == Variant.Type.Dictionary)
 				return ((Godot.Collections.Dictionary)v).GetValueOrDefault(name).Obj;
 
 			if (v.VariantType == Variant.Type.Object)

@@ -1,18 +1,19 @@
 [gd_scene load_steps=4 format=3 uid="uid://faldp31vpik7"]
 
-[ext_resource type="Script" path="res://Main.gd" id="1_hj3p6"]
+[ext_resource type="Script" path="res://Main.cs" id="1_yd0n5"]
 [ext_resource type="PackedScene" uid="uid://bcf1vu31tluwa" path="res://VirtualScroll/VirtualScrollList.tscn" id="2_t3abi"]
 [ext_resource type="Texture2D" uid="uid://b7bv7k2c3vbrp" path="res://icon.svg" id="3_mwujt"]
 
-[node name="Main" type="Control" node_paths=PackedStringArray("list")]
+[node name="Main" type="Control" node_paths=PackedStringArray("ScrollList", "ScrollGrid")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_hj3p6")
-list = NodePath("HBoxContainer/MarginContainer/ColorRect/VirtualScrollList")
+script = ExtResource("1_yd0n5")
+ScrollList = NodePath("HBoxContainer/ColorRect/HBoxContainer/List")
+ScrollGrid = NodePath("HBoxContainer/ColorRect/HBoxContainer/Grid")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -22,25 +23,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer"]
-custom_minimum_size = Vector2(500, 0)
-layout_mode = 2
-theme_override_constants/margin_top = 100
-theme_override_constants/margin_bottom = 100
-
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer/MarginContainer"]
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 color = Color(0.192157, 0.192157, 0.192157, 1)
 
-[node name="VirtualScrollList" parent="HBoxContainer/MarginContainer/ColorRect" instance=ExtResource("2_t3abi")]
-layout_mode = 1
-
-[node name="Template" type="ColorRect" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList"]
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
-color = Color(0, 0, 1, 0)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -48,38 +36,99 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer"]
+[node name="List" parent="HBoxContainer/ColorRect/HBoxContainer" instance=ExtResource("2_t3abi")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Template" type="ColorRect" parent="HBoxContainer/ColorRect/HBoxContainer/List"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+offset_right = 298.0
+offset_bottom = 64.0
+color = Color(0, 0, 1, 0)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = ExtResource("3_mwujt")
 expand_mode = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="-Name" type="Label" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="-Name" type="Label" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "{0}"
 
-[node name="-StaticField" type="Label" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="-StaticField" type="Label" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "{0}"
 horizontal_alignment = 3
 
-[node name="-Price" type="Label" parent="HBoxContainer/MarginContainer/ColorRect/VirtualScrollList/Template/HBoxContainer/HBoxContainer"]
+[node name="-Price" type="Label" parent="HBoxContainer/ColorRect/HBoxContainer/List/Template/HBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "{0:C2}"
 horizontal_alignment = 2
+
+[node name="Grid" parent="HBoxContainer/ColorRect/HBoxContainer" instance=ExtResource("2_t3abi")]
+layout_mode = 2
+size_flags_horizontal = 3
+RowWidth = 96
+
+[node name="Template" type="ColorRect" parent="HBoxContainer/ColorRect/HBoxContainer/Grid"]
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 1
+offset_right = 96.0
+offset_bottom = 128.0
+color = Color(0, 0, 1, 0)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ColorRect/HBoxContainer/Grid/Template"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/ColorRect/HBoxContainer/Grid/Template/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("3_mwujt")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="-Name" type="Label" parent="HBoxContainer/ColorRect/HBoxContainer/Grid/Template/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "{0}"
+horizontal_alignment = 1
+
+[node name="-Price" type="Label" parent="HBoxContainer/ColorRect/HBoxContainer/Grid/Template/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "{0:C2}"
+horizontal_alignment = 1
 
 [node name="Control" type="Control" parent="HBoxContainer"]
 layout_mode = 2
